@@ -19,11 +19,13 @@ jobs:
         node-version: '18'
 
     - name: Install dependencies and build
+      working-directory: ./my-react-app
       run: |
-        npm ci
+        npm ci || npm install
         npm run build
 
     - name: Install Playwright and Chromium
+      working-directory: ./my-react-app
       run: |
         npm install playwright@latest
         npx playwright install --with-deps chromium
@@ -35,7 +37,7 @@ jobs:
       run: |
         npx playwright screenshot \
           --browser=chromium \
-          "file://$PWD/dist/index.html" \
+          "file://$PWD/my-react-app/dist/index.html" \
           "snapshots/snapshot.png"
 
     - name: Upload snapshot as artifact
