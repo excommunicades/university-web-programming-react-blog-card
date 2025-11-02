@@ -1,0 +1,46 @@
+name: HTML Snapshot Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  snapshot-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install dependencies and build
+      run: |
+        npm ci
+        npm run build
+
+    - name: Install Playwright and Chromium
+      run: |
+        npm install playwright@latest
+        npx playwright install --with-deps chromium
+
+    - name: Create snapshot directory
+      run: mkdir -p snapshots
+
+    - name: Generate snapshot from built index.html
+      run: |
+        npx playwright screenshot \
+          --browser=chromium \
+          "file://$PWD/dist/index.html" \
+          "snapshots/snapshot.png"
+
+    - name: Upload snapshot as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: snapshot
+        path: snapshots/
+        retention-days: 7
